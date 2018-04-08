@@ -21,17 +21,17 @@ void setup() {
   pinMode(driveEnable,OUTPUT);
   pinMode(RTDS,OUTPUT);
   pinMode(button, INPUT);
-  pinMode(sensor_break,INPUT);
-  pinMode(sensor_ac_1, INPUT);
-  pinMode(sensor_ac_2, INPUT);
   Serial.begin(9600);
+  //calibrate();
 
 }
+
+
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-calibrate();
+
 switch (state){
   
   case 0: //engine off
@@ -70,39 +70,57 @@ switch (state){
 
 void read_sensors () {
 
-    br = (analogRead(sensor_break)/base_b)*100;
-    s1 = (analogRead(sensor_ac_1)/base_s1)*100;
-    s2 = (analogRead(sensor_ac_2)/base_s2)*100;
+    br = analogRead(sensor_break);
+    br = (br/1023)*100;        
+    s1 = analogRead(sensor_ac_1);
+    s1 = (s1/1023)*100;
+    s2 = analogRead(sensor_ac_2);
+    s2 = (s2/1023)*100;
     bt = digitalRead(button);
     diff = abs(s1 - s2); 
 }
 
 void calibrate (){
 
-Serial.println("Dont press the gas pedal");
+Serial.print("Dont press the gas pedal\n");
+delay(5000);
 int temp1 = analogRead(sensor_ac_1);
-Serial.println("Press the gas pedal to the max");
+Serial.print("Press the gas pedal to the max\n");
+delay(5000);
 int temp2 = analogRead(sensor_ac_1);
 base_s1 = abs(temp1 - temp2);
 
-Serial.println("Dont press the gas pedal again");
-int temp1 = analogRead(sensor_ac_2);
-Serial.println("Pres it to the max");
-int temp2 = analogRead(sensor_ac_2);
+Serial.print("Dont press the gas pedal again\n");
+delay(5000);
+temp1 = analogRead(sensor_ac_2);
+Serial.print("Pres it to the max\n");
+delay(5000);
+temp2 = analogRead(sensor_ac_2);
 base_s2 = abs(temp1 - temp2);
 
-Serial.println("Dont press the break pedal");
-int temp1 = analogRead(sensor_break);
-Serial.println("Press to the max");
-int temp2 = analogRead(sensor_break);
+Serial.print("Dont press the break pedal\n");
+delay(5000);
+temp1 = analogRead(sensor_break);
+Serial.print("Press to the max\n");
+delay(5000);
+temp2 = analogRead(sensor_break);
 base_b = abs(temp1 - temp2);
 
 }
 
 void print_values() {
-
-  Serial.println("Sensor 1: %d", s1);
-  Serial.println("Sensor 2: %d", s2);
-  Serial.println("Break: %d", br);
+  if(bt == HIGH) Serial.print("ON"); 
+  else Serial.print("OFF");
+  Serial.print("Sensor 1: ");
+  Serial.print(s1);
+  Serial.print("%\n");
+  Serial.print("Sensor 2: ");
+  Serial.print(s2);
+  Serial.print("%\n");
+  Serial.print("break: ");
+  Serial.print(br);
+  Serial.print("%\n\n\n");
+  
+  delay(2000);
 
 }
