@@ -5,6 +5,8 @@ const int sensor_break = A0;
 const int sensor_ac_1 = A1;
 const int sensor_ac_2 = A2;
 const int accelerating = 5;
+const int ERROR_SGN = 6;
+
 
 int state = 0;
 float s1=0;
@@ -20,7 +22,7 @@ float s_output=0;
 
 void setup() {
   // put your setup code here, to run once:
-  
+  pinMode(ERROR_SGN, OUTPUT);
   pinMode(accelerating, OUTPUT);
   pinMode(sensor_break, INPUT);
   pinMode(sensor_ac_1,INPUT);
@@ -44,15 +46,19 @@ switch (state){
   
     read_sensors(); 
     print_values();
+    check_output();
     
-    if (diff<10&&bt==HIGH&&br>50) {
-      if(first_init = 0){
+    if (diff<10&&bt==LOW&&br>50&&s_output<5) {
+      
+      if(first_init == 0){
       Serial.print("\n\n Beepping RTDS");
       digitalWrite(RTDS,HIGH);
       delay(3000);
       digitalWrite(RTDS,LOW);
       first_init=1;
       }
+     
+      
       state = 1;
       break;      
     }   
@@ -83,10 +89,12 @@ switch (state){
     break;    
     
   case 2: //fail
+    digitalWrite(ERROR_SGN,HIGH);
     read_sensors();
     print_values();
     check_output();
     if(diff<10) {
+      digitalWrite(ERROR_SGN,LOW);
       state = 0;
       break;
     }
@@ -125,30 +133,31 @@ delay(5000);
 int temp1 = analogRead(sensor_ac_1);
 
 
-Serial.print("Press the throttle pedal to the max\n\n");
+Serial.print("Press the throttle pedal to the max...");
 delay(5000);
 int temp2 = analogRead(sensor_ac_1);
 base_s1 = abs(temp1 - temp2);
-
+Serial.print("OK!\n\n");
 //calibrating sensor 2
 
-Serial.print("Rekease the throttle pedal again\n");
+Serial.print("Release the throttle pedal again\n");
 delay(5000);
 temp1 = analogRead(sensor_ac_2);
-Serial.print("Press it to the max\n\n");
+Serial.print("Press it to the max...");
 delay(5000);
 temp2 = analogRead(sensor_ac_2);
 base_s2 = abs(temp1 - temp2);
-
+Serial.print("OK!\n\n");
 //calibrating break pedal
 
 Serial.print("Release the break pedal\n");
 delay(5000);
 temp1 = analogRead(sensor_break);
-Serial.print("Press it to the max\n");
+Serial.print("Press it to the max...");
 delay(5000);
 temp2 = analogRead(sensor_break);
 base_b = abs(temp1 - temp2);
+Serial.print("OK!\n\n");
 Serial.print("\n\nLoading...\n");
 delay(3000);
 
@@ -178,18 +187,21 @@ void print_values() {
 }
 
 void check_output(){
+  
+  if (state==0||state==2){
+    s_output = 0;
+    analogWrite(accelerating,int((255/100)*s_output));
+  
+  }
 
-  if(s1>s2){
+  else if(s1>s2){
     s_output = s2;
     analogWrite(accelerating,int((255/100)*s_output));        
   }
-  else if(s2>s1){
+  else{
     s_output = s1;
     analogWrite(accelerating,int((255/100)*s_output));
   }
-  else{
-    s_output = 0;
-    analogWrite(accelerating,int((255/100)*s_output));
-  }
+  
   
 }
