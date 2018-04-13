@@ -17,6 +17,9 @@ int diff = 0;
 float base_s1=0;
 float base_s2=0;
 float base_b=0;
+float offset_s1 = 0;
+float offset_s2 = 0;
+float offset_b = 0;
 int first_init=0;
 float s_output=0;
 
@@ -31,7 +34,7 @@ void setup() {
   pinMode(RTDS,OUTPUT);
   pinMode(button, INPUT);
   Serial.begin(9600);
-  calibrate();
+ calibrate();
 
 }
 
@@ -48,7 +51,7 @@ switch (state){
     print_values();
     check_output();
     
-    if (diff<10&&bt==LOW&&br>50&&s_output<5) {
+    if (diff<10 && bt==LOW && br>50 && s1<5 && s2<5) {
       
       if(first_init == 0){
       Serial.print("\n\n Beepping RTDS");
@@ -115,11 +118,11 @@ switch (state){
 void read_sensors () {
 
     br = analogRead(sensor_break);
-    br = (br/base_b)*100;
+    br = ((br-offset_b)/base_b)*100;
     s1 = analogRead(sensor_ac_1);
-    s1=(s1/base_s1)*100;
+    s1=((s1-offset_s1)/base_s1)*100;
     s2 = analogRead(sensor_ac_2);
-    s2 = (s2/base_s2)*100;
+    s2 = ((s2-offset_s2)/base_s2)*100;
     bt = digitalRead(button);
     diff = abs(s1 - s2); 
 }
@@ -136,6 +139,7 @@ int temp1 = analogRead(sensor_ac_1);
 Serial.print("Press the throttle pedal to the max...");
 delay(5000);
 int temp2 = analogRead(sensor_ac_1);
+offset_s1 = temp1;
 base_s1 = abs(temp1 - temp2);
 Serial.print("OK!\n\n");
 //calibrating sensor 2
@@ -146,6 +150,7 @@ temp1 = analogRead(sensor_ac_2);
 Serial.print("Press it to the max...");
 delay(5000);
 temp2 = analogRead(sensor_ac_2);
+offset_s2= temp1;
 base_s2 = abs(temp1 - temp2);
 Serial.print("OK!\n\n");
 //calibrating break pedal
@@ -156,6 +161,7 @@ temp1 = analogRead(sensor_break);
 Serial.print("Press it to the max...");
 delay(5000);
 temp2 = analogRead(sensor_break);
+offset_b = temp1;
 base_b = abs(temp1 - temp2);
 Serial.print("OK!\n\n");
 Serial.print("\n\nLoading...\n");
