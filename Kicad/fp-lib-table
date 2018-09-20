@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name relayg2r)(type KiCad)(uri "C:/Users/thima/Desktop/FORMULA/APPS_FILES/APPS + BSPD kicak")(options "")(descr relayg2r))
+  (lib (name MOLEX_T)(type KiCad)(uri "C:/Users/thima/Desktop/FORMULA/APPS_FILES/APPS + BSPD kicak/Connector_Molex.pretty")(options "")(descr ""))
+)
